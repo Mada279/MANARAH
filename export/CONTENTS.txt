@@ -1,0 +1,42 @@
+MANARAH MVP current package
+
+Includes current local source for:
+- Marketing website updated to MANARAH ecosystem vision
+- docs/ execution documentation
+- Mishkat standalone dashboard (#dashboard)
+- Login UI (#login)
+- API client
+- Express API with bearer token protection
+- Role and organization access checks
+- CRUD for programs, beneficiaries, volunteers, impact metrics
+- JSON local persistence scaffold
+- Repository layer
+- Prisma repository skeleton
+- Docker/PostgreSQL and Prisma schema/seed setup
+- Smoke test script
+
+Excluded:
+- .git/
+- node_modules/
+- dist/
+- server/data/ local runtime data
+- generated archives
+
+After extracting:
+  npm install
+  npm run server:check
+  npm run build
+
+Run locally:
+  npm run server:dev
+  npm run dev
+
+Open:
+  http://localhost:5173/MANARAH/#login
+
+Demo users:
+  admin@manarah.local  (owner)
+  viewer@manarah.local (viewer)
+
+Test API:
+  npm run api:smoke

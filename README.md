@@ -40,6 +40,17 @@
 - [قائمة مراجعة الإطلاق](./docs/08-launch-checklist.md)
 - [نموذج لوحة Mishkat Dashboard](./docs/09-dashboard-prototype.md)
 - [Backend API Scaffold](./docs/10-backend-api-scaffold.md)
+- [CRUD API وربط لوحة مشكاة](./docs/11-crud-api-and-dashboard.md)
+- [تجهيز PostgreSQL وPrisma](./docs/12-postgres-prisma-next-step.md)
+- [Auth وصلاحيات أولية](./docs/13-auth-and-permissions-scaffold.md)
+- [التخزين المحلي المؤقت JSON](./docs/14-local-json-persistence.md)
+- [الاختبار المحلي وSmoke Test](./docs/15-local-testing-and-smoke-test.md)
+- [لوحة مشكاة المستقلة](./docs/16-standalone-dashboard-route.md)
+- [واجهة تسجيل الدخول وحماية Dashboard](./docs/17-login-ui-and-dashboard-guard.md)
+- [حماية API بالـ Token](./docs/18-protected-api-token.md)
+- [صلاحيات الدور والوصول للمؤسسة](./docs/19-role-and-organization-access.md)
+- [Repository Layer](./docs/20-repository-layer.md)
+- [Prisma Repository Skeleton](./docs/21-prisma-repository-skeleton.md)
 
 ---
 
@@ -379,10 +390,68 @@ npm run dev
 npm run server:dev
 ```
 
+لتعمل لوحة Mishkat Dashboard متصلة بالـ API، شغّل الأمرين في نافذتين منفصلتين:
+
+```bash
+npm run server:dev
+npm run dev
+```
+
+ثم افتح صفحة الدخول من:
+
+```txt
+http://localhost:5173/MANARAH/#login
+```
+
+وسجّل بالمستخدم التجريبي:
+
+```txt
+admin@manarah.local
+```
+
+بعد الدخول سيتم تحويلك إلى:
+
+```txt
+http://localhost:5173/MANARAH/#dashboard
+```
+
+أو اضغط زر `لوحة مشكاة` من الموقع.
+
+ويمكن ضبط رابط API عبر:
+
+```env
+VITE_API_URL="http://localhost:4000"
+```
+
 ### فحص TypeScript للـ API
 
 ```bash
 npm run server:check
+```
+
+### اختبار API محليًا
+
+بعد تشغيل `npm run server:dev` في نافذة مستقلة:
+
+```bash
+npm run api:smoke
+```
+
+يتحقق الاختبار من أن المسارات المحمية ترفض الطلبات بدون:
+
+```http
+Authorization: Bearer demo-token
+```
+
+ثم يتحقق من أن مستخدم `viewer@manarah.local` يستطيع القراءة ولا يستطيع الكتابة، وبعدها يسجل دخول المدير ويرسل token مع طلبات CRUD.
+
+### تشغيل PostgreSQL لاحقًا عبر Docker
+
+```bash
+docker compose up -d postgres
+npm run db:generate
+npm run db:migrate
+npm run db:seed
 ```
 
 ### بناء نسخة الإنتاج

@@ -12,9 +12,13 @@
     "server:check": "tsc -p tsconfig.server.json --noEmit",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
-    "db:validate": "prisma validate"
+    "db:validate": "prisma validate",
+    "db:studio": "prisma studio",
+    "db:seed": "tsx prisma/seed.ts",
+    "api:smoke": "node scripts/smoke-test.mjs"
   },
   "dependencies": {
+    "@prisma/client": "^7.8.0",
     "clsx": "2.1.1",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
@@ -39,5 +43,8 @@
     "typescript": "5.9.3",
     "vite": "7.2.4",
     "vite-plugin-singlefile": "2.3.0"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   }
 }

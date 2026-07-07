@@ -5,6 +5,7 @@ const navLinks = [
   { label: 'المنظومة', href: '#features' },
   { label: 'خارطة البناء', href: '#roadmap' },
   { label: 'MVP مشكاة', href: '#mishkat-dashboard' },
+  { label: 'لوحة مشكاة', href: '#dashboard' },
   { label: 'Manarah OS', href: '#technology' },
   { label: 'التكاملات', href: '#api' },
   { label: 'الشركاء', href: '#investors' },
@@ -23,6 +24,13 @@ export default function Navbar() {
   }, []);
 
   const scrollTo = (href: string) => {
+    if (href === '#dashboard') {
+      window.location.hash = 'dashboard';
+      setMobileOpen(false);
+      setActiveSection(href);
+      return;
+    }
+
     const el = document.querySelector(href);
     if (el) el.scrollIntoView({ behavior: 'smooth' });
     setMobileOpen(false);
@@ -64,10 +72,10 @@ export default function Navbar() {
 
           <div className="hidden lg:flex items-center gap-3">
             <button
-              onClick={() => scrollTo('#investors')}
+              onClick={() => scrollTo('#dashboard')}
               className="px-5 py-2 bg-gradient-to-r from-amber-500 to-yellow-400 text-navy font-bold text-sm rounded-xl hover:from-amber-400 hover:to-yellow-300 transition-all duration-300 glow-gold"
             >
-              ابدأ شراكة
+              افتح لوحة مشكاة
             </button>
           </div>
 
@@ -97,10 +105,10 @@ export default function Navbar() {
             ))}
             <div className="pt-3 border-t border-amber-400/10 flex gap-3">
               <button
-                onClick={() => scrollTo('#investors')}
+                onClick={() => scrollTo('#dashboard')}
                 className="flex-1 py-3 bg-gradient-to-r from-amber-500 to-yellow-400 text-navy font-bold rounded-xl text-center"
               >
-                ابدأ شراكة 🤝
+                افتح لوحة مشكاة 🏛️
               </button>
             </div>
           </div>
