@@ -4,15 +4,15 @@ const prisma = new PrismaClient();
 
 async function main() {
   const organization = await prisma.organization.upsert({
-    where: { slug: 'noor-community' },
+    where: { slug: 'altamayuz-education' },
     update: {},
     create: {
-      name: 'مؤسسة النور المجتمعية',
-      slug: 'noor-community',
-      type: 'charity',
-      country: 'EG',
-      city: 'Cairo',
-      description: 'مؤسسة تجريبية لاختبار Mishkat MVP.',
+      name: 'مؤسسة التميز التعليمية',
+      slug: 'altamayuz-education',
+      type: 'academy',
+      country: 'متعدد المواقع',
+      city: 'لابي / كنديا / كوندرا / القرية',
+      description: 'مؤسسة تعليمية يديرها د. مالك بالدي وتشمل مدارس وقسم تحفيظ خارجي وداخلي.',
     },
   });
 
@@ -20,7 +20,7 @@ async function main() {
     where: { email: 'admin@manarah.local' },
     update: {},
     create: {
-      name: 'مدير منارة التجريبي',
+      name: 'د. مالك بالدي',
       email: 'admin@manarah.local',
       phone: '+200000000000',
     },
@@ -61,9 +61,9 @@ async function main() {
     data: {
       organizationId: organization.id,
       managerId: user.id,
-      name: 'برنامج كفالة طالب علم',
-      description: 'برنامج تعليمي تجريبي ضمن Mishkat MVP.',
-      category: 'education',
+      name: 'مدرسة ١ - لابي',
+      description: 'مدرسة ١ في موقع لابي ضمن مؤسسة التميز التعليمية.',
+      category: 'school',
       status: 'active',
     },
   });
@@ -72,9 +72,9 @@ async function main() {
     data: {
       organizationId: organization.id,
       managerId: user.id,
-      name: 'مبادرة السلال الشهرية',
-      description: 'مبادرة إغاثية تجريبية ضمن Mishkat MVP.',
-      category: 'relief',
+      name: 'قسم التحفيظ الداخلي - بنين',
+      description: 'قسم داخلي للبنين فقط في دار التحفيظ.',
+      category: 'quran_internal_boys',
       status: 'active',
     },
   });
@@ -139,7 +139,7 @@ async function main() {
     ],
   });
 
-  console.log('Seed complete:', {
+  console.log('Seed complete for مؤسسة التميز التعليمية:', {
     organization: organization.slug,
     user: user.email,
   });

@@ -18,15 +18,16 @@ import {
   type Program,
   type Volunteer,
 } from '../lib/api';
+import { clearStoredSession, getStoredSession } from '../lib/auth';
 
 const fallbackOrganization: Organization = {
   id: 'org-noor',
-  name: 'مؤسسة النور المجتمعية',
-  slug: 'noor-community',
-  type: 'charity',
-  country: 'EG',
-  city: 'Cairo',
-  description: 'مؤسسة تجريبية لاختبار Mishkat MVP.',
+  name: 'مؤسسة التميز التعليمية',
+  slug: 'altamayuz-education',
+  type: 'academy',
+  country: 'متعدد المواقع',
+  city: 'لابي / كنديا / كوندرا / القرية',
+  description: 'مؤسسة تعليمية يديرها د. مالك بالدي، تشمل مدارس متعددة وقسم تحفيظ خارجي وداخلي.',
   status: 'active',
   createdAt: new Date().toISOString(),
 };
@@ -41,20 +42,20 @@ const fallbackDashboard: OrganizationDashboard = {
 };
 
 const fallbackPrograms: Program[] = [
-  { id: 'program-student-sponsorship', organizationId: 'org-noor', name: 'برنامج كفالة طالب علم', manager: 'فريق التعليم', category: 'education', status: 'active', progress: 78, beneficiaries: 1, volunteers: 1, createdAt: new Date().toISOString() },
-  { id: 'program-monthly-baskets', organizationId: 'org-noor', name: 'مبادرة السلال الشهرية', manager: 'فريق الإغاثة', category: 'relief', status: 'active', progress: 64, beneficiaries: 1, volunteers: 1, createdAt: new Date().toISOString() },
-  { id: 'program-volunteer-training', organizationId: 'org-noor', name: 'دورات تأهيل المتطوعين', manager: 'فريق المجتمع', category: 'community', status: 'active', progress: 91, beneficiaries: 1, volunteers: 1, createdAt: new Date().toISOString() },
+  { id: 'program-school-1-labi', organizationId: 'org-noor', name: 'مدرسة ١ - لابي', manager: 'د. مالك بالدي', category: 'school', status: 'active', progress: 86, beneficiaries: 1, volunteers: 1, createdAt: new Date().toISOString() },
+  { id: 'program-school-2-kindia', organizationId: 'org-noor', name: 'مدرسة ٢ - كنديا', manager: 'د. مالك بالدي', category: 'school', status: 'active', progress: 79, beneficiaries: 1, volunteers: 1, createdAt: new Date().toISOString() },
+  { id: 'program-quran-internal-boys', organizationId: 'org-noor', name: 'قسم التحفيظ الداخلي - بنين', manager: 'المشرف التربوي الداخلي', category: 'quran_internal_boys', status: 'active', progress: 81, beneficiaries: 1, volunteers: 1, createdAt: new Date().toISOString() },
 ];
 
 const fallbackBeneficiaries: Beneficiary[] = [
-  { id: 'ben-ahmed', organizationId: 'org-noor', programId: 'program-student-sponsorship', program: 'برنامج كفالة طالب علم', name: 'أحمد محمد', city: 'القاهرة', ageGroup: 'youth', status: 'active', createdAt: new Date().toISOString() },
+  { id: 'ben-ahmed', organizationId: 'org-noor', programId: 'program-student-sponsorship', program: 'مدرسة ١ - لابي', name: 'أحمد محمد', city: 'القاهرة', ageGroup: 'youth', status: 'active', createdAt: new Date().toISOString() },
   { id: 'ben-mariam', organizationId: 'org-noor', programId: 'program-volunteer-training', program: 'دورات تأهيل المتطوعين', name: 'مريم خالد', city: 'الجيزة', ageGroup: 'adult', status: 'follow_up', createdAt: new Date().toISOString() },
-  { id: 'ben-family-284', organizationId: 'org-noor', programId: 'program-monthly-baskets', program: 'مبادرة السلال الشهرية', name: 'أسرة رقم 284', city: 'القاهرة', ageGroup: 'family', status: 'active', createdAt: new Date().toISOString() },
+  { id: 'ben-family-284', organizationId: 'org-noor', programId: 'program-monthly-baskets', program: 'مبادرة قسم التحفيظ الخارجي', name: 'أسرة رقم 284', city: 'القاهرة', ageGroup: 'family', status: 'active', createdAt: new Date().toISOString() },
 ];
 
 const fallbackVolunteers: Volunteer[] = [
-  { id: 'vol-sara', organizationId: 'org-noor', programId: 'program-student-sponsorship', program: 'برنامج كفالة طالب علم', name: 'سارة علي', skill: 'تعليم', totalHours: 124, status: 'available', createdAt: new Date().toISOString() },
-  { id: 'vol-mahmoud', organizationId: 'org-noor', programId: 'program-monthly-baskets', program: 'مبادرة السلال الشهرية', name: 'محمود حسن', skill: 'لوجستيات', totalHours: 88, status: 'assigned', createdAt: new Date().toISOString() },
+  { id: 'vol-sara', organizationId: 'org-noor', programId: 'program-student-sponsorship', program: 'مدرسة ١ - لابي', name: 'سارة علي', skill: 'تعليم', totalHours: 124, status: 'available', createdAt: new Date().toISOString() },
+  { id: 'vol-mahmoud', organizationId: 'org-noor', programId: 'program-monthly-baskets', program: 'مبادرة قسم التحفيظ الخارجي', name: 'محمود حسن', skill: 'لوجستيات', totalHours: 88, status: 'assigned', createdAt: new Date().toISOString() },
   { id: 'vol-omar', organizationId: 'org-noor', programId: 'program-volunteer-training', program: 'دورات تأهيل المتطوعين', name: 'عمر يوسف', skill: 'تحليل بيانات', totalHours: 46, status: 'available', createdAt: new Date().toISOString() },
 ];
 
@@ -124,6 +125,19 @@ export default function MishkatDashboard() {
     setLoading(true);
     setError(null);
 
+    const session = getStoredSession();
+    if (!session) {
+      setOrganization(fallbackOrganization);
+      setDashboard(fallbackDashboard);
+      setPrograms(fallbackPrograms);
+      setBeneficiaries(fallbackBeneficiaries);
+      setVolunteers(fallbackVolunteers);
+      setMetrics(fallbackMetrics);
+      setConnected(false);
+      setLoading(false);
+      return;
+    }
+
     try {
       const organizations = await getOrganizations();
       const selectedOrganization = organizations[0] ?? fallbackOrganization;
@@ -151,7 +165,12 @@ export default function MishkatDashboard() {
       setVolunteers(fallbackVolunteers);
       setMetrics(fallbackMetrics);
       setConnected(false);
-      setError(err instanceof Error ? err.message : 'تعذر الاتصال بالـ API');
+      if (err instanceof Error && err.message.includes('401')) {
+        clearStoredSession();
+        setError('انتهت جلسة الدخول أو أن رمز الوصول غير صحيح. افتح صفحة الدخول من #login ثم حاول مرة أخرى.');
+      } else {
+        setError(err instanceof Error ? err.message : 'تعذر الاتصال بالـ API');
+      }
     } finally {
       setLoading(false);
     }
@@ -284,7 +303,7 @@ export default function MishkatDashboard() {
             لوحة متصلة بأول <span className="text-gold-gradient">CRUD API</span>
           </h2>
           <p className="text-gray-400 text-lg max-w-3xl mx-auto font-cairo leading-relaxed">
-            هذه النسخة تقرأ وتضيف البرامج والمستفيدين والمتطوعين من API محلية أثناء تشغيل <code dir="ltr" className="text-amber-300">npm run server:dev</code>. البيانات مؤقتة حتى نربط PostgreSQL في المرحلة القادمة.
+            هذه معاينة عامة تعمل ببيانات احتياطية قبل تسجيل الدخول. بعد الدخول من <code dir="ltr" className="text-amber-300">#login</code> وتشغيل <code dir="ltr" className="text-amber-300">npm run server:dev</code> ستتصل اللوحة بالـ API المحلية.
           </p>
         </div>
 

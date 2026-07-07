@@ -4,6 +4,7 @@ import {
   createBeneficiary,
   createImpactMetric,
   createProgram,
+  createStaffMember,
   createVolunteer,
   deleteBeneficiary,
   deleteImpactMetric,
@@ -59,19 +60,21 @@ import {
   type Volunteer,
 } from '../../lib/api';
 import { canManage, clearStoredSession, getStoredSession } from '../../lib/auth';
+import { LanguageThemeControls, usePreferences } from '../../lib/preferences';
 
-type Tab = 'overview' | 'programs' | 'beneficiaries' | 'volunteers' | 'impact' | 'education' | 'boarding' | 'supervisor' | 'settings';
+type Tab = 'overview' | 'programs' | 'beneficiaries' | 'volunteers' | 'impact' | 'education' | 'boarding' | 'supervisor' | 'erp' | 'settings';
 
-const tabs: { id: Tab; label: string; icon: string }[] = [
-  { id: 'overview', label: 'نظرة عامة', icon: '📊' },
-  { id: 'programs', label: 'البرامج', icon: '🧭' },
-  { id: 'beneficiaries', label: 'المستفيدون', icon: '🌱' },
-  { id: 'volunteers', label: 'المتطوعون', icon: '🤝' },
-  { id: 'impact', label: 'مؤشرات الأثر', icon: '📈' },
-  { id: 'education', label: 'التعليم والتحفيظ', icon: '🏫' },
-  { id: 'boarding', label: 'داخلي البنين', icon: '🛏️' },
-  { id: 'supervisor', label: 'لوحة المشرف', icon: '🧑‍🏫' },
-  { id: 'settings', label: 'الإعدادات', icon: '⚙️' },
+const tabs: { id: Tab; labelKey: string; icon: string }[] = [
+  { id: 'overview', labelKey: 'tabs.overview', icon: '📊' },
+  { id: 'programs', labelKey: 'tabs.programs', icon: '🧭' },
+  { id: 'beneficiaries', labelKey: 'tabs.beneficiaries', icon: '🌱' },
+  { id: 'volunteers', labelKey: 'tabs.volunteers', icon: '🤝' },
+  { id: 'impact', labelKey: 'tabs.impact', icon: '📈' },
+  { id: 'education', labelKey: 'tabs.education', icon: '🏫' },
+  { id: 'boarding', labelKey: 'tabs.boarding', icon: '🛏️' },
+  { id: 'supervisor', labelKey: 'tabs.supervisor', icon: '🧑‍🏫' },
+  { id: 'erp', labelKey: 'tabs.erp', icon: '🏢' },
+  { id: 'settings', labelKey: 'tabs.settings', icon: '⚙️' },
 ];
 
 function formatNumber(value: number) {
@@ -119,6 +122,7 @@ const inputClass = 'w-full px-3 py-2 bg-white/5 border border-white/10 rounded-l
 const selectClass = 'w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-gray-300 text-sm focus:outline-none focus:border-amber-400/50';
 
 export default function DashboardApp() {
+  const { t, language, theme } = usePreferences();
   const [activeTab, setActiveTab] = useState<Tab>('overview');
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [authToken, setAuthToken] = useState<string | null>(null);
@@ -153,6 +157,7 @@ export default function DashboardApp() {
   const [metricForm, setMetricForm] = useState({ name: '', key: '', current: '0', target: '100', unit: 'عدد' });
   const [studentForm, setStudentForm] = useState({ name: '', classId: '', track: 'school', academicProgress: '0', quranMemorizedPages: '0', attendanceRate: '100', tuitionStatus: 'due' });
   const [financeForm, setFinanceForm] = useState({ type: 'income', category: 'tuition', amount: '0', description: '' });
+  const [staffForm, setStaffForm] = useState({ name: '', role: 'teacher', department: 'school', salary: '0' });
   const [boardingForm, setBoardingForm] = useState({ studentId: '', room: '', supervisorName: '', tarbiyahScore: '80', supervisionScore: '80', quranRevisionScore: '80', healthStatus: 'good' });
   const [boardingCheckInForm, setBoardingCheckInForm] = useState({ residentId: '', fajrPrayer: true, quranSession: true, memorizationPages: '1', revisionPages: '3', behaviorScore: '85', cleanlinessScore: '85', sleepDisciplineScore: '85', healthStatus: 'good', supervisorNote: '', parentVisible: false });
 
@@ -434,6 +439,33 @@ export default function DashboardApp() {
     }
   };
 
+  const submitStaff = async (event: FormEvent) => {
+    event.preventDefault();
+    const org = requireOrg();
+    if (!org) return;
+    if (!canEdit) {
+      setError('ليس لديك صلاحية تنفيذ هذا الإجراء في النسخة التجريبية.');
+      return;
+    }
+
+    setSaving('staff');
+    try {
+      await createStaffMember(org.id, {
+        name: staffForm.name,
+        role: staffForm.role as 'teacher' | 'quran_teacher' | 'admin' | 'accountant' | 'supervisor' | 'hr',
+        department: staffForm.department as 'school' | 'quran' | 'finance' | 'hr' | 'admin',
+        salary: Number(staffForm.salary || 0),
+        status: 'active',
+      });
+      setStaffForm({ name: '', role: 'teacher', department: 'school', salary: '0' });
+      await loadAll();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'تعذر إضافة المدرس/الموظف');
+    } finally {
+      setSaving(null);
+    }
+  };
+
   const submitBoardingResident = async (event: FormEvent) => {
     event.preventDefault();
     const org = requireOrg();
@@ -532,7 +564,7 @@ export default function DashboardApp() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#071020] text-white" dir="rtl">
+    <div className={`min-h-screen text-white ${theme === 'dark' ? 'bg-[#071020]' : 'bg-[#F7F1E5]'}`} dir={language === 'ar' ? 'rtl' : 'ltr'}>
       <div className="fixed inset-0 islamic-pattern opacity-20 pointer-events-none" />
       <div className="relative z-10 flex min-h-screen">
         <aside className="hidden lg:flex w-72 flex-col border-l border-amber-400/10 bg-[#0A1628]/95 backdrop-blur-xl p-5">
@@ -546,6 +578,10 @@ export default function DashboardApp() {
             </div>
           </a>
 
+          <div className="mb-5">
+            <LanguageThemeControls />
+          </div>
+
           <nav className="space-y-2 flex-1">
             {tabs.map((tab) => (
               <button
@@ -558,23 +594,23 @@ export default function DashboardApp() {
                 }`}
               >
                 <span>{tab.icon}</span>
-                {tab.label}
+                {t(tab.labelKey)}
               </button>
             ))}
           </nav>
 
           <div className="space-y-3">
             <button onClick={() => void loadAll()} className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-gray-300 text-sm font-bold hover:bg-white/10 transition-colors">
-              تحديث البيانات
+              {t('dashboard.refresh')}
             </button>
             <button onClick={() => void resetStore()} disabled={saving === 'reset'} className="w-full py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-300 text-sm font-bold hover:bg-red-500/20 transition-colors disabled:opacity-50">
               إعادة تهيئة البيانات
             </button>
             <button onClick={logout} className="w-full py-3 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-300 text-sm font-bold hover:bg-orange-500/20 transition-colors">
-              تسجيل الخروج
+              {t('dashboard.logout')}
             </button>
             <a href="#hero" className="block w-full text-center py-3 rounded-xl bg-amber-400/10 border border-amber-400/20 text-amber-300 text-sm font-bold hover:bg-amber-400/20 transition-colors">
-              العودة للموقع
+              {t('dashboard.back')}
             </a>
           </div>
         </aside>
@@ -590,11 +626,12 @@ export default function DashboardApp() {
               <div className="flex flex-wrap items-center gap-2 lg:hidden">
                 {tabs.map((tab) => (
                   <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`px-3 py-2 rounded-xl text-xs font-bold ${activeTab === tab.id ? 'bg-amber-400 text-navy' : 'bg-white/5 text-gray-400'}`}>
-                    {tab.icon} {tab.label}
+                    {tab.icon} {t(tab.labelKey)}
                   </button>
                 ))}
               </div>
               <div className="flex flex-wrap items-center gap-2">
+                <LanguageThemeControls />
                 {currentUser && (
                   <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-gray-300 text-xs font-bold">
                     {currentUser.name} · {currentUser.role}
@@ -1300,6 +1337,109 @@ export default function DashboardApp() {
                       </div>
                     </div>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'erp' && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                  {[
+                    { label: t('erp.students'), value: students.length, icon: '🎓', color: 'text-emerald-400' },
+                    { label: t('erp.teachers'), value: staffMembers.length, icon: '👥', color: 'text-teal-400' },
+                    { label: 'الإيرادات / Income', value: educationSummary?.income ?? 0, icon: '💵', color: 'text-green-400' },
+                    { label: 'المصروفات / Expenses', value: educationSummary?.expenses ?? 0, icon: '💳', color: 'text-red-400' },
+                  ].map((stat) => (
+                    <div key={stat.label} className="gradient-border p-5 card-hover">
+                      <div className="flex items-center justify-between mb-4"><span className="text-3xl">{stat.icon}</span><span className="text-xs text-gray-500">ERP</span></div>
+                      <div className={`text-3xl font-black ${stat.color}`}>{formatNumber(stat.value)}</div>
+                      <div className="text-sm text-gray-400 mt-1">{stat.label}</div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="grid xl:grid-cols-3 gap-6">
+                  <div className="xl:col-span-2 gradient-border p-6">
+                    <h2 className="text-xl font-black mb-5">{t('erp.finance')}</h2>
+                    <div className="space-y-3">
+                      {financeEntries.map((entry) => (
+                        <div key={entry.id} className="grid md:grid-cols-5 gap-3 items-center p-4 rounded-xl bg-white/3 border border-white/5 text-sm">
+                          <span className={`font-bold ${entry.type === 'income' ? 'text-green-400' : 'text-red-400'}`}>{entry.type === 'income' ? 'إيراد' : 'مصروف'}</span>
+                          <span className="text-gray-400">{entry.category}</span>
+                          <span className="text-amber-300 font-bold">{formatNumber(entry.amount)}</span>
+                          <span className="md:col-span-2 text-gray-500">{entry.description}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <form onSubmit={submitFinance} className="gradient-border p-6 space-y-3 h-fit">
+                    <h2 className="text-xl font-black">{t('erp.addFinance')}</h2>
+                    <div className="grid grid-cols-2 gap-2">
+                      <select className={selectClass} value={financeForm.type} onChange={(e) => setFinanceForm({ ...financeForm, type: e.target.value })}>
+                        <option value="income">Income / إيراد</option>
+                        <option value="expense">Expense / مصروف</option>
+                      </select>
+                      <select className={selectClass} value={financeForm.category} onChange={(e) => setFinanceForm({ ...financeForm, category: e.target.value })}>
+                        <option value="tuition">Fees / مصروفات</option>
+                        <option value="salary">Salaries / رواتب</option>
+                        <option value="donation">Donation / دعم</option>
+                        <option value="operations">Operations / تشغيل</option>
+                        <option value="other">Other / أخرى</option>
+                      </select>
+                    </div>
+                    <input type="number" min="0" className={inputClass} placeholder="Amount / المبلغ" value={financeForm.amount} onChange={(e) => setFinanceForm({ ...financeForm, amount: e.target.value })} />
+                    <input required className={inputClass} placeholder="Description / الوصف" value={financeForm.description} onChange={(e) => setFinanceForm({ ...financeForm, description: e.target.value })} />
+                    <button disabled={!canEdit || saving === 'finance'} className="w-full py-3 rounded-xl bg-green-400 text-navy font-black disabled:opacity-50">{saving === 'finance' ? 'Saving...' : t('erp.addFinance')}</button>
+                  </form>
+                </div>
+
+                <div className="grid xl:grid-cols-3 gap-6">
+                  <div className="gradient-border p-6">
+                    <h2 className="text-xl font-black mb-5">{t('erp.students')}</h2>
+                    <div className="space-y-3 max-h-[520px] overflow-auto pr-1">
+                      {students.map((student) => (
+                        <div key={student.id} className="p-3 rounded-xl bg-white/3 border border-white/5 text-sm">
+                          <div className="font-bold">{student.name}</div>
+                          <div className="text-xs text-gray-500">{student.className} · {student.academicProgress}% · {student.quranMemorizedPages} صفحة</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="gradient-border p-6">
+                    <h2 className="text-xl font-black mb-5">{t('erp.teachers')}</h2>
+                    <div className="space-y-3 max-h-[520px] overflow-auto pr-1">
+                      {staffMembers.map((staff) => (
+                        <div key={staff.id} className="p-3 rounded-xl bg-white/3 border border-white/5 text-sm">
+                          <div className="font-bold">{staff.name}</div>
+                          <div className="text-xs text-gray-500">{staff.department} · {staff.role} · {formatNumber(staff.salary)}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <form onSubmit={submitStaff} className="gradient-border p-6 space-y-3 h-fit">
+                    <h2 className="text-xl font-black">{t('erp.addStaff')}</h2>
+                    <input required className={inputClass} placeholder="Name / الاسم" value={staffForm.name} onChange={(e) => setStaffForm({ ...staffForm, name: e.target.value })} />
+                    <select className={selectClass} value={staffForm.role} onChange={(e) => setStaffForm({ ...staffForm, role: e.target.value })}>
+                      <option value="teacher">Teacher / مدرس</option>
+                      <option value="quran_teacher">Quran Teacher / محفظ</option>
+                      <option value="admin">Admin / إداري</option>
+                      <option value="accountant">Accountant / محاسب</option>
+                      <option value="supervisor">Supervisor / مشرف</option>
+                      <option value="hr">HR / موارد بشرية</option>
+                    </select>
+                    <select className={selectClass} value={staffForm.department} onChange={(e) => setStaffForm({ ...staffForm, department: e.target.value })}>
+                      <option value="school">School / مدرسة</option>
+                      <option value="quran">Quran / تحفيظ</option>
+                      <option value="finance">Finance / مالية</option>
+                      <option value="hr">HR / موارد بشرية</option>
+                      <option value="admin">Admin / إدارة</option>
+                    </select>
+                    <input type="number" min="0" className={inputClass} placeholder="Salary / الراتب" value={staffForm.salary} onChange={(e) => setStaffForm({ ...staffForm, salary: e.target.value })} />
+                    <button disabled={!canEdit || saving === 'staff'} className="w-full py-3 rounded-xl bg-teal-400 text-navy font-black disabled:opacity-50">{saving === 'staff' ? 'Saving...' : t('erp.addStaff')}</button>
+                  </form>
                 </div>
               </div>
             )}

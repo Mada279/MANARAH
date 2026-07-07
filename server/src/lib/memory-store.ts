@@ -205,7 +205,7 @@ const defaultStore: Store = {
   users: [
     {
       id: 'user-admin',
-      name: 'مدير منارة التجريبي',
+      name: 'د. مالك بالدي',
       email: 'admin@manarah.local',
       role: 'owner',
       organizationIds: ['org-noor'],
@@ -232,151 +232,181 @@ const defaultStore: Store = {
   organizations: [
     {
       id: 'org-noor',
-      name: 'مؤسسة النور المجتمعية',
-      slug: 'noor-community',
-      type: 'charity',
-      country: 'EG',
-      city: 'Cairo',
-      description: 'مؤسسة تجريبية لاختبار Mishkat MVP.',
+      name: 'مؤسسة التميز التعليمية',
+      slug: 'altamayuz-education',
+      type: 'academy',
+      country: 'متعدد المواقع',
+      city: 'لابي / كنديا / كوندرا / القرية',
+      description: 'مؤسسة تعليمية تجريبية يديرها د. مالك بالدي، وتشمل مدارس متعددة وقسم تحفيظ خارجي وداخلي.',
       status: 'active',
       createdAt: now,
     },
   ],
   programs: [
     {
-      id: 'program-student-sponsorship',
+      id: 'program-school-1-labi',
       organizationId: 'org-noor',
-      name: 'برنامج كفالة طالب علم',
-      manager: 'فريق التعليم',
-      category: 'education',
+      name: 'مدرسة ١ - لابي',
+      manager: 'د. مالك بالدي',
+      category: 'school',
       status: 'active',
-      progress: 78,
+      progress: 86,
       createdAt: now,
     },
     {
-      id: 'program-monthly-baskets',
+      id: 'program-school-2-kindia',
       organizationId: 'org-noor',
-      name: 'مبادرة السلال الشهرية',
-      manager: 'فريق الإغاثة',
-      category: 'relief',
+      name: 'مدرسة ٢ - كنديا',
+      manager: 'د. مالك بالدي',
+      category: 'school',
       status: 'active',
-      progress: 64,
+      progress: 79,
       createdAt: now,
     },
     {
-      id: 'program-volunteer-training',
+      id: 'program-school-3-kundara',
       organizationId: 'org-noor',
-      name: 'دورات تأهيل المتطوعين',
-      manager: 'فريق المجتمع',
-      category: 'community',
+      name: 'مدرسة ٣ - كوندرا',
+      manager: 'د. مالك بالدي',
+      category: 'school',
       status: 'active',
-      progress: 91,
+      progress: 74,
+      createdAt: now,
+    },
+    {
+      id: 'program-quran-external-boys',
+      organizationId: 'org-noor',
+      name: 'قسم التحفيظ الخارجي - أولاد',
+      manager: 'مشرف التحفيظ الخارجي',
+      category: 'quran_external_boys',
+      status: 'active',
+      progress: 88,
+      createdAt: now,
+    },
+    {
+      id: 'program-quran-external-girls',
+      organizationId: 'org-noor',
+      name: 'قسم التحفيظ الخارجي - بنات',
+      manager: 'مشرفة التحفيظ الخارجي',
+      category: 'quran_external_girls',
+      status: 'active',
+      progress: 84,
+      createdAt: now,
+    },
+    {
+      id: 'program-quran-internal-boys',
+      organizationId: 'org-noor',
+      name: 'قسم التحفيظ الداخلي - بنين',
+      manager: 'المشرف التربوي الداخلي',
+      category: 'quran_internal_boys',
+      status: 'active',
+      progress: 81,
       createdAt: now,
     },
   ],
   beneficiaries: [
     {
-      id: 'ben-ahmed',
+      id: 'ben-labi-students',
       organizationId: 'org-noor',
-      programId: 'program-student-sponsorship',
-      name: 'أحمد محمد',
-      city: 'القاهرة',
-      ageGroup: 'youth',
+      programId: 'program-school-1-labi',
+      name: 'طلاب مدرسة ١ - لابي',
+      city: 'لابي',
+      ageGroup: 'school_students',
       status: 'active',
       createdAt: now,
     },
     {
-      id: 'ben-mariam',
+      id: 'ben-quran-boys',
       organizationId: 'org-noor',
-      programId: 'program-volunteer-training',
-      name: 'مريم خالد',
-      city: 'الجيزة',
-      ageGroup: 'adult',
-      status: 'follow_up',
+      programId: 'program-quran-external-boys',
+      name: 'طلاب التحفيظ الخارجي - أولاد',
+      city: 'القرية',
+      ageGroup: 'quran_students',
+      status: 'active',
       createdAt: now,
     },
     {
-      id: 'ben-family-284',
+      id: 'ben-quran-girls',
       organizationId: 'org-noor',
-      programId: 'program-monthly-baskets',
-      name: 'أسرة رقم 284',
-      city: 'القاهرة',
-      ageGroup: 'family',
+      programId: 'program-quran-external-girls',
+      name: 'طالبات التحفيظ الخارجي - بنات',
+      city: 'القرية',
+      ageGroup: 'quran_students',
       status: 'active',
       createdAt: now,
     },
   ],
   volunteers: [
     {
-      id: 'vol-sara',
+      id: 'vol-school-support',
       organizationId: 'org-noor',
-      programId: 'program-student-sponsorship',
-      name: 'سارة علي',
-      skill: 'تعليم',
+      programId: 'program-school-1-labi',
+      name: 'فريق دعم مدارس التميز',
+      skill: 'إدارة مدرسية',
       totalHours: 124,
-      status: 'available',
-      createdAt: now,
-    },
-    {
-      id: 'vol-mahmoud',
-      organizationId: 'org-noor',
-      programId: 'program-monthly-baskets',
-      name: 'محمود حسن',
-      skill: 'لوجستيات',
-      totalHours: 88,
       status: 'assigned',
       createdAt: now,
     },
     {
-      id: 'vol-omar',
+      id: 'vol-quran-supervision',
       organizationId: 'org-noor',
-      programId: 'program-volunteer-training',
-      name: 'عمر يوسف',
-      skill: 'تحليل بيانات',
-      totalHours: 46,
+      programId: 'program-quran-internal-boys',
+      name: 'فريق إشراف الداخلي',
+      skill: 'إشراف وتربية',
+      totalHours: 156,
+      status: 'assigned',
+      createdAt: now,
+    },
+    {
+      id: 'vol-parent-communication',
+      organizationId: 'org-noor',
+      programId: 'program-quran-external-girls',
+      name: 'فريق تواصل أولياء الأمور',
+      skill: 'متابعة وتقارير',
+      totalHours: 64,
       status: 'available',
       createdAt: now,
     },
   ],
   impactMetrics: [
     {
-      id: 'metric-beneficiaries',
+      id: 'metric-students',
       organizationId: 'org-noor',
-      name: 'عدد المستفيدين',
-      key: 'beneficiaries_count',
-      current: 1248,
-      target: 1600,
-      unit: 'مستفيد',
+      name: 'عدد الطلاب والطالبات',
+      key: 'students_count',
+      current: 420,
+      target: 600,
+      unit: 'طالب/طالبة',
       createdAt: now,
     },
     {
-      id: 'metric-volunteer-hours',
+      id: 'metric-quran-attendance',
       organizationId: 'org-noor',
-      name: 'ساعات التطوع',
-      key: 'volunteer_hours',
-      current: 3640,
-      target: 5000,
-      unit: 'ساعة',
+      name: 'حضور حلقات التحفيظ',
+      key: 'quran_attendance',
+      current: 87,
+      target: 95,
+      unit: '%',
       createdAt: now,
     },
     {
-      id: 'metric-documents',
+      id: 'metric-education-progress',
       organizationId: 'org-noor',
-      name: 'المستندات المؤرشفة',
-      key: 'documents_archived',
-      current: 42,
-      target: 60,
-      unit: 'مستند',
+      name: 'متوسط التقدم العلمي',
+      key: 'education_progress',
+      current: 82,
+      target: 90,
+      unit: '%',
       createdAt: now,
     },
     {
-      id: 'metric-impact-completeness',
+      id: 'metric-reports-completeness',
       organizationId: 'org-noor',
-      name: 'اكتمال مؤشرات الأثر',
-      key: 'impact_metrics_completeness',
-      current: 12,
-      target: 12,
-      unit: 'مؤشر',
+      name: 'اكتمال تقارير المتابعة',
+      key: 'reports_completeness',
+      current: 76,
+      target: 100,
+      unit: '%',
       createdAt: now,
     },
   ],
@@ -395,52 +425,88 @@ const defaultStore: Store = {
   ],
   educationClasses: [
     {
-      id: 'class-grade-5-a',
+      id: 'class-school-1-labi',
       organizationId: 'org-noor',
-      name: 'الصف الخامس - أ',
+      name: 'مدرسة ١ - لابي',
       track: 'school',
-      level: 'ابتدائي',
-      teacherName: 'أ. منى عبد الرحمن',
-      room: 'A-105',
-      studentsCount: 28,
+      level: 'مدرسة أساسية',
+      teacherName: 'مدير المدرسة - لابي',
+      room: 'لابي',
+      studentsCount: 120,
       averageProgress: 84,
       createdAt: now,
     },
     {
-      id: 'class-quran-hifz-1',
+      id: 'class-school-2-kindia',
       organizationId: 'org-noor',
-      name: 'حلقة حفظ جزء عم',
-      track: 'quran',
-      level: 'مبتدئ',
-      teacherName: 'الشيخ خالد منصور',
-      room: 'Q-01',
-      studentsCount: 18,
-      averageProgress: 72,
+      name: 'مدرسة ٢ - كنديا',
+      track: 'school',
+      level: 'مدرسة أساسية',
+      teacherName: 'مدير المدرسة - كنديا',
+      room: 'كنديا',
+      studentsCount: 105,
+      averageProgress: 80,
       createdAt: now,
     },
     {
-      id: 'class-quran-itqan',
+      id: 'class-school-3-kundara',
       organizationId: 'org-noor',
-      name: 'حلقة الإتقان والمراجعة',
+      name: 'مدرسة ٣ - كوندرا',
+      track: 'school',
+      level: 'مدرسة أساسية',
+      teacherName: 'مدير المدرسة - كوندرا',
+      room: 'كوندرا',
+      studentsCount: 95,
+      averageProgress: 77,
+      createdAt: now,
+    },
+    {
+      id: 'class-quran-external-boys',
+      organizationId: 'org-noor',
+      name: 'التحفيظ الخارجي - أولاد',
       track: 'quran',
-      level: 'متقدم',
-      teacherName: 'الشيخة فاطمة سالم',
-      room: 'Q-03',
-      studentsCount: 14,
-      averageProgress: 91,
+      level: 'خارجي',
+      teacherName: 'محفظ قسم الأولاد الخارجي',
+      room: 'القرية - خارجي أولاد',
+      studentsCount: 48,
+      averageProgress: 86,
+      createdAt: now,
+    },
+    {
+      id: 'class-quran-external-girls',
+      organizationId: 'org-noor',
+      name: 'التحفيظ الخارجي - بنات',
+      track: 'quran',
+      level: 'خارجي',
+      teacherName: 'محفظة قسم البنات الخارجي',
+      room: 'القرية - خارجي بنات',
+      studentsCount: 44,
+      averageProgress: 89,
+      createdAt: now,
+    },
+    {
+      id: 'class-quran-internal-boys',
+      organizationId: 'org-noor',
+      name: 'التحفيظ الداخلي - بنين',
+      track: 'quran',
+      level: 'داخلي بنين',
+      teacherName: 'المشرف التربوي الداخلي',
+      room: 'القرية - داخلي بنين',
+      studentsCount: 28,
+      averageProgress: 82,
       createdAt: now,
     },
   ],
   students: [
     {
-      id: 'student-aya',
+      id: 'student-labi-1',
       organizationId: 'org-noor',
-      classId: 'class-grade-5-a',
-      name: 'آية محمود',
-      guardianName: 'محمود علي',
+      classId: 'class-school-1-labi',
+      name: 'آدم مالك',
+      guardianName: 'مالك بالدي',
       track: 'school',
       academicProgress: 88,
-      quranMemorizedPages: 22,
+      quranMemorizedPages: 18,
       attendanceRate: 96,
       tuitionStatus: 'paid',
       status: 'active',
@@ -449,7 +515,7 @@ const defaultStore: Store = {
     {
       id: 'student-yassin',
       organizationId: 'org-noor',
-      classId: 'class-quran-hifz-1',
+      classId: 'class-quran-internal-boys',
       name: 'ياسين أحمد',
       guardianName: 'أحمد حسن',
       track: 'quran',
@@ -461,12 +527,12 @@ const defaultStore: Store = {
       createdAt: now,
     },
     {
-      id: 'student-malak',
+      id: 'student-girls-quran-1',
       organizationId: 'org-noor',
-      classId: 'class-quran-itqan',
-      name: 'ملك إبراهيم',
+      classId: 'class-quran-external-girls',
+      name: 'حفصة إبراهيم',
       guardianName: 'إبراهيم يوسف',
-      track: 'hybrid',
+      track: 'quran',
       academicProgress: 93,
       quranMemorizedPages: 120,
       attendanceRate: 98,
@@ -474,22 +540,76 @@ const defaultStore: Store = {
       status: 'active',
       createdAt: now,
     },
+    {
+      id: 'student-kindia-1',
+      organizationId: 'org-noor',
+      classId: 'class-school-2-kindia',
+      name: 'مريم كنديا',
+      guardianName: 'ولي أمر مريم',
+      track: 'school',
+      academicProgress: 81,
+      quranMemorizedPages: 12,
+      attendanceRate: 94,
+      tuitionStatus: 'paid',
+      status: 'active',
+      createdAt: now,
+    },
   ],
   staffMembers: [
     {
-      id: 'staff-mona',
+      id: 'staff-malik-baldi',
       organizationId: 'org-noor',
-      name: 'أ. منى عبد الرحمن',
-      role: 'teacher',
+      name: 'د. مالك بالدي',
+      role: 'supervisor',
+      department: 'admin',
+      salary: 0,
+      status: 'active',
+      createdAt: now,
+    },
+    {
+      id: 'staff-school-labi',
+      organizationId: 'org-noor',
+      name: 'مدير مدرسة ١ - لابي',
+      role: 'admin',
       department: 'school',
       salary: 8500,
       status: 'active',
       createdAt: now,
     },
     {
-      id: 'staff-khaled',
+      id: 'staff-school-kindia',
       organizationId: 'org-noor',
-      name: 'الشيخ خالد منصور',
+      name: 'مدير مدرسة ٢ - كنديا',
+      role: 'admin',
+      department: 'school',
+      salary: 8200,
+      status: 'active',
+      createdAt: now,
+    },
+    {
+      id: 'staff-school-kundara',
+      organizationId: 'org-noor',
+      name: 'مدير مدرسة ٣ - كوندرا',
+      role: 'admin',
+      department: 'school',
+      salary: 8000,
+      status: 'active',
+      createdAt: now,
+    },
+    {
+      id: 'staff-quran-boys',
+      organizationId: 'org-noor',
+      name: 'مشرف التحفيظ الخارجي - أولاد',
+      role: 'quran_teacher',
+      department: 'quran',
+      salary: 7000,
+      status: 'active',
+      createdAt: now,
+    },
+    {
+      id: 'staff-quran-girls',
+      organizationId: 'org-noor',
+      name: 'مشرفة التحفيظ الخارجي - بنات',
       role: 'quran_teacher',
       department: 'quran',
       salary: 7000,
@@ -499,7 +619,7 @@ const defaultStore: Store = {
     {
       id: 'staff-accountant',
       organizationId: 'org-noor',
-      name: 'أ. أحمد محاسب',
+      name: 'مسؤول ماليات مؤسسة التميز',
       role: 'accountant',
       department: 'finance',
       salary: 6500,
@@ -514,7 +634,7 @@ const defaultStore: Store = {
       type: 'income',
       category: 'tuition',
       amount: 42000,
-      description: 'مصروفات دراسية - يوليو',
+      description: 'رسوم مدارس التميز - لابي وكنديا وكوندرا',
       date: now,
       createdAt: now,
     },
@@ -524,7 +644,7 @@ const defaultStore: Store = {
       type: 'income',
       category: 'donation',
       amount: 18000,
-      description: 'دعم حلقات التحفيظ',
+      description: 'دعم قسم التحفيظ الخارجي والداخلي',
       date: now,
       createdAt: now,
     },
@@ -534,7 +654,7 @@ const defaultStore: Store = {
       type: 'expense',
       category: 'salary',
       amount: 22000,
-      description: 'رواتب المعلمين والإدارة',
+      description: 'رواتب المدارس والتحفيظ والموارد البشرية',
       date: now,
       createdAt: now,
     },
@@ -544,13 +664,13 @@ const defaultStore: Store = {
       id: 'boarding-yassin',
       organizationId: 'org-noor',
       studentId: 'student-yassin',
-      room: 'غرفة 3 - مبنى البنين',
-      supervisorName: 'المشرف التربوي أ. مصطفى',
+      room: 'سكن البنين - القرية - غرفة ٣',
+      supervisorName: 'المشرف التربوي للداخلي - قسم البنين',
       tarbiyahScore: 86,
       supervisionScore: 90,
       quranRevisionScore: 78,
       healthStatus: 'good',
-      notes: 'طالب منتظم في السكن الداخلي وحلقة الحفظ، يحتاج زيادة ورد المراجعة.',
+      notes: 'طالب داخلي في قسم البنين بدار التحفيظ، تظهر لولي الأمر النتائج العامة فقط.',
       parentVisible: true,
       createdAt: now,
     },
@@ -598,52 +718,58 @@ function normalizeStore(store: Store): Store {
   store.boardingResidents ??= [];
   store.boardingCheckIns ??= [];
 
-  for (const defaultUser of defaultStore.users) {
-    if (!store.users.some((user) => user.email === defaultUser.email)) {
-      store.users.push(defaultUser);
-    }
-  }
+  const removeObsoleteSeedIds = <T extends { id: string }>(items: T[], obsoleteIds: string[]) => {
+    const obsolete = new Set(obsoleteIds);
+    return items.filter((item) => !obsolete.has(item.id));
+  };
 
-  for (const defaultOrganization of defaultStore.organizations) {
-    if (!store.organizations.some((organization) => organization.id === defaultOrganization.id)) {
-      store.organizations.push(defaultOrganization);
+  const upsertById = <T extends { id: string }>(items: T[], defaults: T[]) => {
+    for (const defaultItem of defaults) {
+      const existing = items.find((item) => item.id === defaultItem.id);
+      if (existing) {
+        Object.assign(existing, defaultItem);
+      } else {
+        items.push(defaultItem);
+      }
     }
-  }
+  };
 
-  for (const defaultClass of defaultStore.educationClasses) {
-    if (!store.educationClasses.some((item) => item.id === defaultClass.id)) {
-      store.educationClasses.push(defaultClass);
-    }
-  }
+  store.programs = removeObsoleteSeedIds(store.programs, [
+    'program-student-sponsorship',
+    'program-monthly-baskets',
+    'program-volunteer-training',
+  ]);
+  store.beneficiaries = removeObsoleteSeedIds(store.beneficiaries, ['ben-ahmed', 'ben-mariam', 'ben-family-284']);
+  store.volunteers = removeObsoleteSeedIds(store.volunteers, ['vol-sara', 'vol-mahmoud', 'vol-omar']);
+  store.impactMetrics = removeObsoleteSeedIds(store.impactMetrics, [
+    'metric-beneficiaries',
+    'metric-volunteer-hours',
+    'metric-documents',
+    'metric-impact-completeness',
+  ]);
+  store.educationClasses = removeObsoleteSeedIds(store.educationClasses, [
+    'class-grade-5-a',
+    'class-quran-hifz-1',
+    'class-quran-itqan',
+  ]);
+  store.students = removeObsoleteSeedIds(store.students, ['student-aya', 'student-malak']);
+  store.staffMembers = removeObsoleteSeedIds(store.staffMembers, ['staff-mona', 'staff-khaled']);
 
-  for (const defaultStudent of defaultStore.students) {
-    if (!store.students.some((item) => item.id === defaultStudent.id)) {
-      store.students.push(defaultStudent);
-    }
-  }
+  upsertById(store.users, defaultStore.users);
+  upsertById(store.organizations, defaultStore.organizations);
+  upsertById(store.programs, defaultStore.programs);
+  upsertById(store.beneficiaries, defaultStore.beneficiaries);
+  upsertById(store.volunteers, defaultStore.volunteers);
+  upsertById(store.impactMetrics, defaultStore.impactMetrics);
+  upsertById(store.educationClasses, defaultStore.educationClasses);
+  upsertById(store.students, defaultStore.students);
+  upsertById(store.staffMembers, defaultStore.staffMembers);
+  upsertById(store.financeEntries, defaultStore.financeEntries);
+  upsertById(store.boardingResidents, defaultStore.boardingResidents);
+  upsertById(store.boardingCheckIns, defaultStore.boardingCheckIns);
 
-  for (const defaultStaff of defaultStore.staffMembers) {
-    if (!store.staffMembers.some((item) => item.id === defaultStaff.id)) {
-      store.staffMembers.push(defaultStaff);
-    }
-  }
-
-  for (const defaultEntry of defaultStore.financeEntries) {
-    if (!store.financeEntries.some((item) => item.id === defaultEntry.id)) {
-      store.financeEntries.push(defaultEntry);
-    }
-  }
-
-  for (const defaultResident of defaultStore.boardingResidents) {
-    if (!store.boardingResidents.some((item) => item.id === defaultResident.id)) {
-      store.boardingResidents.push(defaultResident);
-    }
-  }
-
-  for (const defaultCheckIn of defaultStore.boardingCheckIns) {
-    if (!store.boardingCheckIns.some((item) => item.id === defaultCheckIn.id)) {
-      store.boardingCheckIns.push(defaultCheckIn);
-    }
+  if (!store.auditLogs.some((item) => item.id === 'audit-initial')) {
+    store.auditLogs.push(...defaultStore.auditLogs);
   }
 
   return store;

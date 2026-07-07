@@ -23,6 +23,55 @@ body {
   direction: rtl;
 }
 
+.theme-light body {
+  background-color: #F7F1E5;
+  color: #0A1628;
+}
+
+.theme-light .gradient-border {
+  background: linear-gradient(135deg, #FFFFFF, #F3E8D0);
+  box-shadow: 0 16px 45px rgba(15, 23, 42, 0.08);
+}
+
+.theme-light .nav-glass {
+  background: rgba(255, 250, 240, 0.88);
+  border-bottom-color: rgba(160, 120, 48, 0.22);
+}
+
+.theme-light .text-white,
+.theme-light .text-gray-300,
+.theme-light .text-gray-400 {
+  color: #152238 !important;
+}
+
+.theme-light .text-gray-500,
+.theme-light .text-gray-600 {
+  color: #64748B !important;
+}
+
+.theme-light .border-white\/5,
+.theme-light .border-white\/10 {
+  border-color: rgba(15, 23, 42, 0.10) !important;
+}
+
+.theme-light .bg-white\/2,
+.theme-light .bg-white\/3,
+.theme-light .bg-white\/5 {
+  background-color: rgba(15, 23, 42, 0.04) !important;
+}
+
+.theme-light .bg-\[\#071020\],
+.theme-light .bg-\[\#0A1628\]\/70 {
+  background-color: rgba(255, 255, 255, 0.78) !important;
+}
+
+.theme-light input,
+.theme-light select,
+.theme-light textarea {
+  color: #0F172A !important;
+  background-color: rgba(255, 255, 255, 0.76) !important;
+}
+
 .font-arabic {
   font-family: 'Amiri', 'Cairo', serif;
 }

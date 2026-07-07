@@ -60,6 +60,8 @@
 - [التقرير الشهري للداخلي](./docs/28-boarding-monthly-report.md)
 - [لوحة المشرف التربوي للداخلي](./docs/29-boarding-supervisor-dashboard.md)
 - [لوحة ولي الأمر](./docs/30-parent-portal.md)
+- [بيانات مؤسسة التميز التعليمية](./docs/31-altamayuz-demo-data.md)
+- [اللغات الثلاث والوضع الفاتح/الداكن وERP المدرسة](./docs/32-languages-theme-erp.md)
 
 ---
 

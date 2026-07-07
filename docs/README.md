@@ -35,6 +35,8 @@
 29. [التقرير الشهري للداخلي](./28-boarding-monthly-report.md)
 30. [لوحة المشرف التربوي للداخلي](./29-boarding-supervisor-dashboard.md)
 31. [لوحة ولي الأمر](./30-parent-portal.md)
+32. [بيانات مؤسسة التميز التعليمية](./31-altamayuz-demo-data.md)
+33. [اللغات الثلاث والوضع الفاتح/الداكن وERP المدرسة](./32-languages-theme-erp.md)
 
 ## ترتيب التنفيذ المقترح
 

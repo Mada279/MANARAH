@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { API_BASE_URL, getParentStudentResults, type ParentStudentResults } from '../../lib/api';
 import { clearStoredSession, getStoredSession } from '../../lib/auth';
+import { LanguageThemeControls, usePreferences } from '../../lib/preferences';
 
 type ParentResultCard = ParentStudentResults & {
   studentId: string;
@@ -25,6 +26,7 @@ function ProgressBar({ value, color = 'bg-amber-400' }: { value: number; color?:
 }
 
 export default function ParentPortal() {
+  const { t, language, theme } = usePreferences();
   const [results, setResults] = useState<ParentResultCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -71,23 +73,24 @@ export default function ParentPortal() {
   };
 
   return (
-    <div className="min-h-screen bg-[#071020] text-white relative overflow-hidden" dir="rtl">
+    <div className={`min-h-screen text-white relative overflow-hidden ${theme === 'dark' ? 'bg-[#071020]' : 'bg-[#F7F1E5]'}`} dir={language === 'ar' ? 'rtl' : 'ltr'}>
       <div className="absolute inset-0 islamic-pattern opacity-20 pointer-events-none" />
       <div className="relative z-10 max-w-6xl mx-auto px-4 py-8 md:py-12">
         <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
           <div>
             <div className="text-xs text-amber-400 font-bold mb-2">MANARAH · Parent Portal</div>
-            <h1 className="text-3xl md:text-4xl font-black text-gold-gradient font-arabic">لوحة ولي الأمر</h1>
+            <h1 className="text-3xl md:text-4xl font-black text-gold-gradient font-arabic">{t('parent.title')}</h1>
             <p className="text-gray-400 mt-2 leading-relaxed">
-              متابعة النتائج العامة للأبناء فقط: التقدم العلمي، الحفظ، الحضور، المصروفات، والتوصيات العامة دون عرض تفاصيل الإشراف الداخلي.
+              {t('parent.policy')}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
+            <LanguageThemeControls />
             <button onClick={() => void loadResults()} className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-gray-300 text-sm font-bold hover:bg-white/10">
-              تحديث النتائج
+              {t('dashboard.refresh')}
             </button>
             <button onClick={logout} className="px-4 py-2 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-300 text-sm font-bold hover:bg-orange-500/20">
-              تسجيل الخروج
+              {t('dashboard.logout')}
             </button>
           </div>
         </header>
