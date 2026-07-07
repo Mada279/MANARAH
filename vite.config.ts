@@ -10,6 +10,9 @@ const __dirname = path.dirname(__filename);
 
 // https://vite.dev/config/
 export default defineConfig({
+  // أضف هذا السطر ليتوافق مع اسم المستودع الخاص بك على GitHub
+  base: "/MANARAH/", 
+  
   plugins: [react(), tailwindcss(), viteSingleFile()],
   resolve: {
     alias: {
