@@ -41,6 +41,29 @@ import {
   listImpactMetrics,
   updateImpactMetric,
 } from './repositories/impact.repository.js';
+import { listAuditLogs, recordAuditLog } from './repositories/audit.repository.js';
+import {
+  buildBoardingMonthlyReport,
+  buildBoardingReport,
+  buildBoardingSummary,
+  buildBoardingSupervisorDashboard,
+  createBoardingCheckIn,
+  buildEducationReport,
+  buildEducationSummary,
+  buildParentStudentResults,
+  buildStudentReport,
+  createBoardingResident,
+  createEducationClass,
+  createFinanceEntry,
+  createStaffMember,
+  createStudent,
+  listBoardingCheckIns,
+  listBoardingResidents,
+  listEducationClasses,
+  listFinanceEntries,
+  listStaffMembers,
+  listStudents,
+} from './repositories/education.repository.js';
 
 dotenv.config();
 
@@ -111,6 +134,19 @@ function ensureOrganization(req: express.Request, res: express.Response) {
   return organization;
 }
 
+function audit(res: express.Response, input: {
+  organizationId?: string;
+  action: string;
+  entityType: string;
+  entityId?: string;
+  metadata?: Record<string, unknown>;
+}) {
+  recordAuditLog({
+    actor: getRequestUser(res),
+    ...input,
+  });
+}
+
 app.get('/health', (_req, res) => {
   res.json({
     ok: true,
@@ -130,6 +166,14 @@ app.post('/api/v1/auth/login', (req, res, next) => {
   try {
     const { email } = loginSchema.parse(req.body);
     const user = findUserByEmail(email);
+
+    recordAuditLog({
+      actor: user,
+      action: 'auth.login',
+      entityType: 'user',
+      entityId: user.id,
+      metadata: { email: user.email, role: user.role },
+    });
 
     res.json({
       data: {
@@ -167,8 +211,39 @@ app.get('/api/v1/me', (_req, res) => {
   });
 });
 
+app.get('/api/v1/parent/students/:studentId/results', (req, res) => {
+  const user = getRequestUser(res);
+  if (!user) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return;
+  }
+
+  const studentId = routeParam(req.params.studentId);
+  const canView = canManageRole(user.role) || user.parentStudentIds?.includes(studentId);
+  if (!canView) {
+    res.status(403).json({
+      error: 'Forbidden',
+      message: 'Parent can only view assigned student results',
+    });
+    return;
+  }
+
+  const results = buildParentStudentResults(studentId);
+  if (!results) {
+    res.status(404).json({ error: 'StudentNotFound' });
+    return;
+  }
+
+  res.json({ data: results });
+});
+
 app.post('/api/v1/dev/reset-store', requireManage, (_req, res) => {
   resetStore();
+  audit(res, {
+    action: 'store.reset',
+    entityType: 'system',
+    entityId: 'json-store',
+  });
   res.json({ data: { ok: true, message: 'Store reset to seed data' } });
 });
 
@@ -203,6 +278,13 @@ app.post('/api/v1/organizations', requireManage, (req, res, next) => {
 
     const input = createOrganizationSchema.parse(req.body);
     const organization = createOrganization(input, user);
+    audit(res, {
+      organizationId: organization.id,
+      action: 'organization.create',
+      entityType: 'organization',
+      entityId: organization.id,
+      metadata: { name: organization.name, slug: organization.slug },
+    });
 
     res.status(201).json({ data: organization });
   } catch (error) {
@@ -215,6 +297,14 @@ app.get('/api/v1/organizations/:organizationId/dashboard', (req, res) => {
   if (!organization) return;
 
   res.json({ data: buildDashboard(organization.id) });
+});
+
+app.get('/api/v1/organizations/:organizationId/audit-logs', (req, res) => {
+  const organization = ensureOrganization(req, res);
+  if (!organization) return;
+
+  const limit = Number(req.query.limit ?? 50);
+  res.json({ data: listAuditLogs(organization.id, Number.isFinite(limit) ? limit : 50) });
 });
 
 app.get('/api/v1/organizations/:organizationId/programs', (req, res) => {
@@ -239,6 +329,13 @@ app.post('/api/v1/organizations/:organizationId/programs', requireManage, (req, 
 
     const input = createProgramSchema.parse(req.body);
     const program = createProgram(organization.id, input);
+    audit(res, {
+      organizationId: organization.id,
+      action: 'program.create',
+      entityType: 'program',
+      entityId: program.id,
+      metadata: { name: program.name },
+    });
 
     res.status(201).json({ data: program });
   } catch (error) {
@@ -261,6 +358,14 @@ app.patch('/api/v1/organizations/:organizationId/programs/:programId', requireMa
       return;
     }
 
+    audit(res, {
+      organizationId: organization.id,
+      action: 'program.update',
+      entityType: 'program',
+      entityId: program.id,
+      metadata: { fields: Object.keys(input) },
+    });
+
     res.json({ data: program });
   } catch (error) {
     next(error);
@@ -276,6 +381,13 @@ app.delete('/api/v1/organizations/:organizationId/programs/:programId', requireM
     res.status(404).json({ error: 'ProgramNotFound' });
     return;
   }
+
+  audit(res, {
+    organizationId: organization.id,
+    action: 'program.delete',
+    entityType: 'program',
+    entityId: routeParam(req.params.programId),
+  });
 
   res.status(204).send();
 });
@@ -302,6 +414,13 @@ app.post('/api/v1/organizations/:organizationId/beneficiaries', requireManage, (
 
     const input = createBeneficiarySchema.parse(req.body);
     const beneficiary = createBeneficiary(organization.id, input);
+    audit(res, {
+      organizationId: organization.id,
+      action: 'beneficiary.create',
+      entityType: 'beneficiary',
+      entityId: beneficiary.id,
+      metadata: { name: beneficiary.name },
+    });
 
     res.status(201).json({ data: beneficiary });
   } catch (error) {
@@ -324,6 +443,14 @@ app.patch('/api/v1/organizations/:organizationId/beneficiaries/:beneficiaryId', 
       return;
     }
 
+    audit(res, {
+      organizationId: organization.id,
+      action: 'beneficiary.update',
+      entityType: 'beneficiary',
+      entityId: beneficiary.id,
+      metadata: { fields: Object.keys(input) },
+    });
+
     res.json({ data: beneficiary });
   } catch (error) {
     next(error);
@@ -339,6 +466,13 @@ app.delete('/api/v1/organizations/:organizationId/beneficiaries/:beneficiaryId',
     res.status(404).json({ error: 'BeneficiaryNotFound' });
     return;
   }
+
+  audit(res, {
+    organizationId: organization.id,
+    action: 'beneficiary.delete',
+    entityType: 'beneficiary',
+    entityId: routeParam(req.params.beneficiaryId),
+  });
 
   res.status(204).send();
 });
@@ -365,6 +499,13 @@ app.post('/api/v1/organizations/:organizationId/volunteers', requireManage, (req
 
     const input = createVolunteerSchema.parse(req.body);
     const volunteer = createVolunteer(organization.id, input);
+    audit(res, {
+      organizationId: organization.id,
+      action: 'volunteer.create',
+      entityType: 'volunteer',
+      entityId: volunteer.id,
+      metadata: { name: volunteer.name },
+    });
 
     res.status(201).json({ data: volunteer });
   } catch (error) {
@@ -387,6 +528,14 @@ app.patch('/api/v1/organizations/:organizationId/volunteers/:volunteerId', requi
       return;
     }
 
+    audit(res, {
+      organizationId: organization.id,
+      action: 'volunteer.update',
+      entityType: 'volunteer',
+      entityId: volunteer.id,
+      metadata: { fields: Object.keys(input) },
+    });
+
     res.json({ data: volunteer });
   } catch (error) {
     next(error);
@@ -402,6 +551,13 @@ app.delete('/api/v1/organizations/:organizationId/volunteers/:volunteerId', requ
     res.status(404).json({ error: 'VolunteerNotFound' });
     return;
   }
+
+  audit(res, {
+    organizationId: organization.id,
+    action: 'volunteer.delete',
+    entityType: 'volunteer',
+    entityId: routeParam(req.params.volunteerId),
+  });
 
   res.status(204).send();
 });
@@ -429,6 +585,13 @@ app.post('/api/v1/organizations/:organizationId/impact-metrics', requireManage, 
 
     const input = createImpactMetricSchema.parse(req.body);
     const metric = createImpactMetric(organization.id, input);
+    audit(res, {
+      organizationId: organization.id,
+      action: 'impactMetric.create',
+      entityType: 'impactMetric',
+      entityId: metric.id,
+      metadata: { name: metric.name, key: metric.key },
+    });
 
     res.status(201).json({ data: metric });
   } catch (error) {
@@ -451,6 +614,14 @@ app.patch('/api/v1/organizations/:organizationId/impact-metrics/:metricId', requ
       return;
     }
 
+    audit(res, {
+      organizationId: organization.id,
+      action: 'impactMetric.update',
+      entityType: 'impactMetric',
+      entityId: metric.id,
+      metadata: { fields: Object.keys(input) },
+    });
+
     res.json({ data: metric });
   } catch (error) {
     next(error);
@@ -467,7 +638,357 @@ app.delete('/api/v1/organizations/:organizationId/impact-metrics/:metricId', req
     return;
   }
 
+  audit(res, {
+    organizationId: organization.id,
+    action: 'impactMetric.delete',
+    entityType: 'impactMetric',
+    entityId: routeParam(req.params.metricId),
+  });
+
   res.status(204).send();
+});
+
+
+app.get('/api/v1/organizations/:organizationId/education/summary', (req, res) => {
+  const organization = ensureOrganization(req, res);
+  if (!organization) return;
+
+  res.json({ data: buildEducationSummary(organization.id) });
+});
+
+app.get('/api/v1/organizations/:organizationId/education/reports/summary', (req, res) => {
+  const organization = ensureOrganization(req, res);
+  if (!organization) return;
+
+  const report = buildEducationReport(organization.id);
+  audit(res, {
+    organizationId: organization.id,
+    action: 'educationReport.view',
+    entityType: 'educationReport',
+    entityId: 'summary',
+  });
+
+  res.json({ data: report });
+});
+
+app.get('/api/v1/organizations/:organizationId/education/classes', (req, res) => {
+  const organization = ensureOrganization(req, res);
+  if (!organization) return;
+
+  res.json({ data: listEducationClasses(organization.id) });
+});
+
+const createEducationClassSchema = z.object({
+  name: z.string().min(2),
+  track: z.enum(['school', 'quran', 'hybrid']).default('school'),
+  level: z.string().min(1),
+  teacherName: z.string().min(2),
+  room: z.string().optional(),
+  studentsCount: z.coerce.number().int().min(0).default(0),
+  averageProgress: z.coerce.number().min(0).max(100).default(0),
+});
+
+app.post('/api/v1/organizations/:organizationId/education/classes', requireManage, (req, res, next) => {
+  try {
+    const organization = ensureOrganization(req, res);
+    if (!organization) return;
+
+    const input = createEducationClassSchema.parse(req.body);
+    const item = createEducationClass(organization.id, input);
+    audit(res, {
+      organizationId: organization.id,
+      action: 'educationClass.create',
+      entityType: 'educationClass',
+      entityId: item.id,
+      metadata: { name: item.name, track: item.track },
+    });
+
+    res.status(201).json({ data: item });
+  } catch (error) {
+    next(error);
+  }
+});
+
+
+app.get('/api/v1/organizations/:organizationId/education/boarding/summary', (req, res) => {
+  const organization = ensureOrganization(req, res);
+  if (!organization) return;
+
+  res.json({ data: buildBoardingSummary(organization.id) });
+});
+
+app.get('/api/v1/organizations/:organizationId/education/boarding/residents', (req, res) => {
+  const organization = ensureOrganization(req, res);
+  if (!organization) return;
+
+  res.json({ data: listBoardingResidents(organization.id) });
+});
+
+const createBoardingResidentSchema = z.object({
+  studentId: z.string().min(2),
+  room: z.string().min(2),
+  supervisorName: z.string().min(2),
+  tarbiyahScore: z.coerce.number().min(0).max(100).default(80),
+  supervisionScore: z.coerce.number().min(0).max(100).default(80),
+  quranRevisionScore: z.coerce.number().min(0).max(100).default(80),
+  healthStatus: z.enum(['good', 'watch', 'needs_attention']).default('good'),
+  notes: z.string().optional(),
+  parentVisible: z.coerce.boolean().default(true),
+});
+
+app.post('/api/v1/organizations/:organizationId/education/boarding/residents', requireManage, (req, res, next) => {
+  try {
+    const organization = ensureOrganization(req, res);
+    if (!organization) return;
+
+    const input = createBoardingResidentSchema.parse(req.body);
+    const resident = createBoardingResident(organization.id, input);
+    audit(res, {
+      organizationId: organization.id,
+      action: 'boardingResident.create',
+      entityType: 'boardingResident',
+      entityId: resident.id,
+      metadata: { studentId: resident.studentId, boysOnly: true },
+    });
+
+    res.status(201).json({ data: resident });
+  } catch (error) {
+    if (error instanceof Error && error.message === 'StudentNotFound') {
+      res.status(404).json({ error: 'StudentNotFound' });
+      return;
+    }
+    next(error);
+  }
+});
+
+app.get('/api/v1/organizations/:organizationId/education/boarding/supervisor-dashboard', (req, res) => {
+  const organization = ensureOrganization(req, res);
+  if (!organization) return;
+
+  const supervisorName = typeof req.query.supervisorName === 'string' ? req.query.supervisorName : undefined;
+  const date = typeof req.query.date === 'string' ? req.query.date : undefined;
+  const dashboard = buildBoardingSupervisorDashboard(organization.id, supervisorName, date);
+  audit(res, {
+    organizationId: organization.id,
+    action: 'boardingSupervisorDashboard.view',
+    entityType: 'boardingSupervisorDashboard',
+    entityId: dashboard.date,
+    metadata: { supervisorName },
+  });
+
+  res.json({ data: dashboard });
+});
+
+app.get('/api/v1/organizations/:organizationId/education/boarding/reports/summary', (req, res) => {
+  const organization = ensureOrganization(req, res);
+  if (!organization) return;
+
+  const report = buildBoardingReport(organization.id);
+  audit(res, {
+    organizationId: organization.id,
+    action: 'boardingReport.view',
+    entityType: 'boardingReport',
+    entityId: 'boys-boarding-summary',
+  });
+
+  res.json({ data: report });
+});
+
+app.get('/api/v1/organizations/:organizationId/education/boarding/reports/monthly', (req, res) => {
+  const organization = ensureOrganization(req, res);
+  if (!organization) return;
+
+  const month = typeof req.query.month === 'string' ? req.query.month : undefined;
+  const report = buildBoardingMonthlyReport(organization.id, month);
+  audit(res, {
+    organizationId: organization.id,
+    action: 'boardingMonthlyReport.view',
+    entityType: 'boardingMonthlyReport',
+    entityId: report.month,
+  });
+
+  res.json({ data: report });
+});
+
+app.get('/api/v1/organizations/:organizationId/education/boarding/residents/:residentId/check-ins', (req, res) => {
+  const organization = ensureOrganization(req, res);
+  if (!organization) return;
+
+  res.json({ data: listBoardingCheckIns(organization.id, routeParam(req.params.residentId)) });
+});
+
+const createBoardingCheckInSchema = z.object({
+  date: z.string().default(() => new Date().toISOString()),
+  fajrPrayer: z.coerce.boolean().default(false),
+  quranSession: z.coerce.boolean().default(false),
+  memorizationPages: z.coerce.number().int().min(0).default(0),
+  revisionPages: z.coerce.number().int().min(0).default(0),
+  behaviorScore: z.coerce.number().min(0).max(100).default(80),
+  cleanlinessScore: z.coerce.number().min(0).max(100).default(80),
+  sleepDisciplineScore: z.coerce.number().min(0).max(100).default(80),
+  healthStatus: z.enum(['good', 'watch', 'needs_attention']).default('good'),
+  supervisorNote: z.string().optional(),
+  parentVisible: z.coerce.boolean().default(false),
+});
+
+app.post('/api/v1/organizations/:organizationId/education/boarding/residents/:residentId/check-ins', requireManage, (req, res, next) => {
+  try {
+    const organization = ensureOrganization(req, res);
+    if (!organization) return;
+
+    const input = createBoardingCheckInSchema.parse(req.body);
+    const checkIn = createBoardingCheckIn(organization.id, {
+      residentId: routeParam(req.params.residentId),
+      ...input,
+    });
+    audit(res, {
+      organizationId: organization.id,
+      action: 'boardingCheckIn.create',
+      entityType: 'boardingCheckIn',
+      entityId: checkIn.id,
+      metadata: { residentId: checkIn.residentId, parentVisible: checkIn.parentVisible },
+    });
+
+    res.status(201).json({ data: checkIn });
+  } catch (error) {
+    if (error instanceof Error && error.message === 'BoardingResidentNotFound') {
+      res.status(404).json({ error: 'BoardingResidentNotFound' });
+      return;
+    }
+    next(error);
+  }
+});
+
+app.get('/api/v1/organizations/:organizationId/education/students', (req, res) => {
+  const organization = ensureOrganization(req, res);
+  if (!organization) return;
+
+  res.json({ data: listStudents(organization.id) });
+});
+
+app.get('/api/v1/organizations/:organizationId/education/students/:studentId/report', (req, res) => {
+  const organization = ensureOrganization(req, res);
+  if (!organization) return;
+
+  const report = buildStudentReport(organization.id, routeParam(req.params.studentId));
+  if (!report) {
+    res.status(404).json({ error: 'StudentNotFound' });
+    return;
+  }
+
+  audit(res, {
+    organizationId: organization.id,
+    action: 'studentReport.view',
+    entityType: 'student',
+    entityId: report.student.id,
+  });
+
+  res.json({ data: report });
+});
+
+const createStudentSchema = z.object({
+  name: z.string().min(2),
+  classId: z.string().optional(),
+  guardianName: z.string().optional(),
+  track: z.enum(['school', 'quran', 'hybrid']).default('school'),
+  academicProgress: z.coerce.number().min(0).max(100).default(0),
+  quranMemorizedPages: z.coerce.number().int().min(0).default(0),
+  attendanceRate: z.coerce.number().min(0).max(100).default(100),
+  tuitionStatus: z.enum(['paid', 'partial', 'due', 'scholarship']).default('due'),
+  status: z.enum(['active', 'follow_up', 'graduated', 'archived']).default('active'),
+});
+
+app.post('/api/v1/organizations/:organizationId/education/students', requireManage, (req, res, next) => {
+  try {
+    const organization = ensureOrganization(req, res);
+    if (!organization) return;
+
+    const input = createStudentSchema.parse(req.body);
+    const item = createStudent(organization.id, input);
+    audit(res, {
+      organizationId: organization.id,
+      action: 'student.create',
+      entityType: 'student',
+      entityId: item.id,
+      metadata: { name: item.name, track: item.track },
+    });
+
+    res.status(201).json({ data: item });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get('/api/v1/organizations/:organizationId/education/staff', (req, res) => {
+  const organization = ensureOrganization(req, res);
+  if (!organization) return;
+
+  res.json({ data: listStaffMembers(organization.id) });
+});
+
+const createStaffSchema = z.object({
+  name: z.string().min(2),
+  role: z.enum(['teacher', 'quran_teacher', 'admin', 'accountant', 'supervisor', 'hr']).default('teacher'),
+  department: z.enum(['school', 'quran', 'finance', 'hr', 'admin']).default('school'),
+  salary: z.coerce.number().min(0).default(0),
+  status: z.enum(['active', 'on_leave', 'inactive']).default('active'),
+});
+
+app.post('/api/v1/organizations/:organizationId/education/staff', requireManage, (req, res, next) => {
+  try {
+    const organization = ensureOrganization(req, res);
+    if (!organization) return;
+
+    const input = createStaffSchema.parse(req.body);
+    const item = createStaffMember(organization.id, input);
+    audit(res, {
+      organizationId: organization.id,
+      action: 'staff.create',
+      entityType: 'staff',
+      entityId: item.id,
+      metadata: { name: item.name, role: item.role },
+    });
+
+    res.status(201).json({ data: item });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get('/api/v1/organizations/:organizationId/education/finance', (req, res) => {
+  const organization = ensureOrganization(req, res);
+  if (!organization) return;
+
+  res.json({ data: listFinanceEntries(organization.id) });
+});
+
+const createFinanceSchema = z.object({
+  type: z.enum(['income', 'expense']),
+  category: z.enum(['tuition', 'donation', 'salary', 'operations', 'books', 'transport', 'other']).default('other'),
+  amount: z.coerce.number().min(0),
+  description: z.string().min(2),
+  date: z.string().default(() => new Date().toISOString()),
+});
+
+app.post('/api/v1/organizations/:organizationId/education/finance', requireManage, (req, res, next) => {
+  try {
+    const organization = ensureOrganization(req, res);
+    if (!organization) return;
+
+    const input = createFinanceSchema.parse(req.body);
+    const item = createFinanceEntry(organization.id, input);
+    audit(res, {
+      organizationId: organization.id,
+      action: 'financeEntry.create',
+      entityType: 'financeEntry',
+      entityId: item.id,
+      metadata: { type: item.type, amount: item.amount, category: item.category },
+    });
+
+    res.status(201).json({ data: item });
+  } catch (error) {
+    next(error);
+  }
 });
 
 app.use((error: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

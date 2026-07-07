@@ -12,10 +12,12 @@ import Community from './components/Community';
 import Footer from './components/Footer';
 import DashboardApp from './components/dashboard/DashboardApp';
 import LoginPage from './components/dashboard/LoginPage';
+import ParentPortal from './components/dashboard/ParentPortal';
 import { getStoredSession } from './lib/auth';
 
 function getRoute() {
   if (window.location.hash === '#dashboard') return 'dashboard';
+  if (window.location.hash === '#parent') return 'parent';
   if (window.location.hash === '#login') return 'login';
   return 'marketing';
 }
@@ -35,6 +37,10 @@ function App() {
 
   if (route === 'dashboard') {
     return getStoredSession() ? <DashboardApp /> : <LoginPage />;
+  }
+
+  if (route === 'parent') {
+    return getStoredSession() ? <ParentPortal /> : <LoginPage />;
   }
 
   return (

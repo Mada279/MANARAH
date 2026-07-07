@@ -13,8 +13,8 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      await loginAndStore(email);
-      window.location.hash = 'dashboard';
+      const session = await loginAndStore(email);
+      window.location.hash = session.user.role === 'parent' ? 'parent' : 'dashboard';
     } catch (err) {
       setError(err instanceof Error ? err.message : 'تعذر تسجيل الدخول');
     } finally {
@@ -49,7 +49,7 @@ export default function LoginPage() {
               className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 font-cairo text-sm focus:outline-none focus:border-amber-400/50"
               dir="ltr"
             />
-            <p className="mt-2 text-xs text-gray-600 font-cairo">المستخدم التجريبي: admin@manarah.local</p>
+            <p className="mt-2 text-xs text-gray-600 font-cairo">المدير: admin@manarah.local · ولي الأمر: parent@manarah.local</p>
           </div>
 
           {error && (

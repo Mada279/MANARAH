@@ -51,6 +51,15 @@
 - [صلاحيات الدور والوصول للمؤسسة](./docs/19-role-and-organization-access.md)
 - [Repository Layer](./docs/20-repository-layer.md)
 - [Prisma Repository Skeleton](./docs/21-prisma-repository-skeleton.md)
+- [Audit Log وسجل التدقيق](./docs/22-audit-log.md)
+- [إدارة المدارس ودور التحفيظ داخل مشكاة](./docs/23-education-and-quran-schools.md)
+- [تقارير التعليم والماليات](./docs/24-education-reports.md)
+- [تقرير الطالب](./docs/25-student-report.md)
+- [الداخلي للبنين في دور التحفيظ](./docs/26-boys-boarding-quran-centers.md)
+- [المتابعة اليومية للداخلي](./docs/27-boarding-daily-checkins.md)
+- [التقرير الشهري للداخلي](./docs/28-boarding-monthly-report.md)
+- [لوحة المشرف التربوي للداخلي](./docs/29-boarding-supervisor-dashboard.md)
+- [لوحة ولي الأمر](./docs/30-parent-portal.md)
 
 ---
 
