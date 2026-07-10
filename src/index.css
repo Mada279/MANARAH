@@ -31,6 +31,39 @@ body {
   font-family: 'Cairo', sans-serif;
 }
 
+/* Project utility classes used across the custom landing page */
+.text-navy {
+  color: var(--navy);
+}
+
+.border-navy {
+  border-color: var(--navy);
+}
+
+.bg-white\/2 {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.bg-white\/3 {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.hover\:bg-white\/6:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+.focus\:bg-white\/8:focus {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.text-white\/3 {
+  color: rgba(255, 255, 255, 0.03);
+}
+
+.opacity-8 {
+  opacity: 0.08;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
